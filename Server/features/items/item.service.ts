@@ -6,6 +6,18 @@ import { logger } from '../../logger/logger';
 
 export class ItemService {
 
+  // פונקציה תומכת Pagination
+  async getAllItems(page?: number, limit?: number): Promise<IItem[]> {
+    const query = ItemModel.find({ status: 'available' }).populate('ownerId', 'name email');
+    
+    if (page && limit) {
+      const skip = (page - 1) * limit;
+      return await query.skip(skip).limit(limit);
+    }
+    
+    return await query;
+  }
+
   async createItem(itemData: any): Promise<IItem> {
     const validatedData = createItemSchema.parse(itemData);
 

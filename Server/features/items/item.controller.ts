@@ -15,22 +15,30 @@ export class ItemController {
     }
   }
 
-  async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { category } = req.query;
-      let items;
-      
-      if (category) {
-        items = await itemService.getItemsByCategory(category as ItemCategory);
-      } else {
-        items = await itemService.getAllAvailableItems();
-      }
+ async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { category, page, limit } = req.query;
 
-      res.status(200).json(items);
-    } catch (error) {
-      next(error);
+    // 1. המרת ערכי ה-Pagination למספרים (אם קיימים)
+    const pageNum = page ? parseInt(page as string) : undefined;
+    const limitNum = limit ? parseInt(limit as string) : undefined;
+
+    let items;
+
+    // 2. בדיקה: האם יש קטגוריה?
+    if (category) {
+      // אם יש קטגוריה - נשלוף לפי קטגוריה
+      items = await itemService.getItemsByCategory(category as ItemCategory);
+    } else {
+      // אם אין קטגוריה - נשתמש בפונקציה החדשה שתומכת ב-Pagination או ב"הכל"
+      items = await itemService.getAllItems(pageNum, limitNum);
     }
+
+    res.status(200).json(items);
+  } catch (error) {
+    next(error);
   }
+}
 
   async getByUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
