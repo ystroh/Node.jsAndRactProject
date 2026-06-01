@@ -1,21 +1,31 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import { connectDB } from './config/db';
 import userRouter from './features/users/user.routes';
 import requestRouter from './features/requests/request.routes';
 import itemRouter from './features/items/item.routes';
 import { errorHandler } from './middlewares/error.middleware';
+import 'dotenv/config'; // זה טוען את המשתנים מקובץ ה-.env לתוך process.env
+import { limiter } from './middlewares/rate-limited';
 
-const app: Application = express();
-const PORT = process.env.PORT || 3000;
 
-// הפעלת החיבור למסד הנתונים מתוך תיקיית ה-config
-connectDB();
+export const app: Application = express();
+const PORT = process.env.PORT;
+
+
+const corsOptions = {
+  origin: ['http://localhost:3000', 'https://your-production-site.com'], 
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'], // אילו פעולות את מאפשרת
+  credentials: true // אם את צריכה לשלוח Cookies או Headers מיוחדים
+};
+
 
 // מידלוורס בסיסיים
-app.use(cors()); 
+app.use(cors(corsOptions)); 
 app.use(express.json()); 
 
+
+// החלת המגבלה על כל השרת (גלובלי)
+app.use(limiter);
 // חיבור לראוטרים של הישויות
 app.use('/api/users', userRouter);
 
@@ -29,14 +39,6 @@ app.use('/api/items', itemRouter);
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).send('השרת פעיל ויציב!');
 });
-app.use(errorHandler);
-// מידלוור מרכזי לתפיסת שגיאות גלובלית (Global Error Handler)
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error('שגיאה שנלכדה בשרת:', err);
-  res.status(500).json({ error: 'שגיאה פנימית בשרת, אנא נסה שנית מאוחר יותר.' });
-});
 
-// הפעלת השרת
-app.listen(PORT, () => {
-  console.log(`השרת רץ ומאזין בפורט ${PORT}`);
-});
+app.use(errorHandler);
+
