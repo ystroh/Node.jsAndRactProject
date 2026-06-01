@@ -14,6 +14,6 @@ router.get('/user/:userId', requestController.getMyRequests.bind(requestControll
 router.patch('/:id/status', requestController.updateStatus.bind(requestController));
 
 // 4. ביטול ומחיקת בקשה: DELETE /api/requests/:id
-router.delete('/:id', requestController.cancel.bind(requestController));
+router.delete('/:id', requestController.delete.bind(requestController));
 
 export default router;

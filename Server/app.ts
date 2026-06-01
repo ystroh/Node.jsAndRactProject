@@ -4,6 +4,7 @@ import { connectDB } from './config/db';
 import userRouter from './features/users/user.routes';
 import requestRouter from './features/requests/request.routes';
 import itemRouter from './features/items/item.routes';
+import { errorHandler } from './middlewares/error.middleware';
 
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
@@ -28,7 +29,7 @@ app.use('/api/items', itemRouter);
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).send('השרת פעיל ויציב!');
 });
-
+app.use(errorHandler);
 // מידלוור מרכזי לתפיסת שגיאות גלובלית (Global Error Handler)
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error('שגיאה שנלכדה בשרת:', err);

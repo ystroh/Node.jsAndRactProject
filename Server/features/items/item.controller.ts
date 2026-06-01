@@ -9,16 +9,11 @@ export class ItemController {
   // יצירת פריט חדש
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { title, description, category, ownerId, imageUrl } = req.body;
-
-      if (!title || !description || !category || !ownerId) {
-         res.status(400).json({ error: 'נא למלא את כל שדות החובה' });
-         return;
-      }
-
-      const newItem = await itemService.createItem({ title, description, category, ownerId, imageUrl });
+      // מעבירים את req.body ישירות ל-Service והוא כבר יפעיל את Zod
+      const newItem = await itemService.createItem(req.body);
       res.status(201).json({ message: 'הפריט פורסם בהצלחה!', item: newItem });
     } catch (error) {
+      // אם Zod יזרוק שגיאה, ה-next(error) יעביר אותה ל-Middleware של השגיאות שלך
       next(error);
     }
   }
@@ -30,10 +25,8 @@ export class ItemController {
 
       let items;
       if (category) {
-        // אם המשתמש שלח קטגוריה בסינון: /api/items?category=מטבח וכלי בית
         items = await itemService.getItemsByCategory(category as ItemCategory);
       } else {
-        // אם לא נשלח סינון, מביאים את כל הפריטים הזמינים
         items = await itemService.getAllAvailableItems();
       }
 
@@ -61,8 +54,8 @@ export class ItemController {
       const updatedItem = await itemService.updateItem(id, req.body);
 
       if (!updatedItem) {
-         res.status(404).json({ error: 'הפריט לא נמצא' });
-         return;
+        res.status(404).json({ error: 'הפריט לא נמצא' });
+        return;
       }
 
       res.status(200).json({ message: 'הפריט עודכן בהצלחה', item: updatedItem });
@@ -78,8 +71,8 @@ export class ItemController {
       const deletedItem = await itemService.deleteItem(id);
 
       if (!deletedItem) {
-         res.status(404).json({ error: 'הפריט לא נמצא' });
-         return;
+        res.status(404).json({ error: 'הפריט לא נמצא' });
+        return;
       }
 
       res.status(200).json({ message: 'הפריט נמחק בהצלחה' });
