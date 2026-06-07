@@ -43,4 +43,33 @@ export class RequestController {
       next(error);
     }
   }
+
+
+  /**
+   * מטפל בבקשת אישור/דחיית פנייה של מפרסם
+   */
+  approveRequest = async (req: Request, res: Response): Promise<void> => {
+    try {
+      // הולידציה כבר עברה במידלוור בראוטר, 
+      // אז אנחנו סומכים על כך שה-requestId וה-isApproved תקינים
+      const { requestId } = req.params;
+      const { isApproved } = req.body;
+
+      // קריאה לשירות שיעדכן ב-DB וידחוף לתור
+      await requestService.approveRequest(requestId as any, isApproved);
+
+      res.status(200).json({ 
+        success: true, 
+        message: `הבקשה עודכנה בהצלחה לסטטוס: ${isApproved ? 'מאושר' : 'דחוי'}. תהליך שליחת המיילים החל ברקע.` 
+      });
+      
+    } catch (error: any) {
+      console.error('❌ שגיאה בקונטרולר בזמן אישור בקשה:', error.message);
+      res.status(500).json({ 
+        success: false, 
+        message: "שגיאה בביצוע הפעולה", 
+        error: error.message 
+      });
+    }
+  };
 }

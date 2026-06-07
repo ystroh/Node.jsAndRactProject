@@ -19,4 +19,14 @@ export const updateStatusSchema = z.object({
   status: z.enum(['pending', 'approved', 'rejected', 'completed'])
 });
 
+
+export const approveRequestSchema = z.object({
+  body: z.object({
+    isApproved: z.boolean({ required_error: "חובה להזין האם הבקשה מאושרת"  } as any)
+  }),
+  params: z.object({
+    requestId: z.string().length(24, "מזהה בקשה לא תקין") // בדיקה שזה ObjectId של מונגו
+  })
+});
+
 // READ & DELETE: משתמשים ב-idSchema בלבד (דרך ה-URL)
