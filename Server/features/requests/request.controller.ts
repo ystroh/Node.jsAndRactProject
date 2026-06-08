@@ -4,7 +4,7 @@ import { RequestService } from './request.service';
 const requestService = new RequestService();
 
 export class RequestController {
-  
+
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const newRequest = await requestService.createRequest(req.body);
@@ -16,7 +16,12 @@ export class RequestController {
 
   async getMyRequests(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { userId } = req.params;
+      const userId = req.headers['x-user-id'] as string;
+
+     if (!userId) {
+      res.status(401).json({ message: "User ID is missing" });
+      return;
+    } 
       const requests = await requestService.getMyRequests(userId as string);
       res.status(200).json(requests);
     } catch (error) {
@@ -26,7 +31,7 @@ export class RequestController {
 
   async updateStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const {id } = req.params;
+      const { id } = req.params;
       const updatedRequest = await requestService.updateRequestStatus(id as string, req.body);
       res.status(200).json({ message: 'סטטוס הבקשה עודכן', request: updatedRequest });
     } catch (error) {
@@ -58,17 +63,17 @@ export class RequestController {
       // קריאה לשירות שיעדכן ב-DB וידחוף לתור
       await requestService.approveRequest(requestId as any, isApproved);
 
-      res.status(200).json({ 
-        success: true, 
-        message: `הבקשה עודכנה בהצלחה לסטטוס: ${isApproved ? 'מאושר' : 'דחוי'}. תהליך שליחת המיילים החל ברקע.` 
+      res.status(200).json({
+        success: true,
+        message: `הבקשה עודכנה בהצלחה לסטטוס: ${isApproved ? 'מאושר' : 'דחוי'}. תהליך שליחת המיילים החל ברקע.`
       });
-      
+
     } catch (error: any) {
       console.error('❌ שגיאה בקונטרולר בזמן אישור בקשה:', error.message);
-      res.status(500).json({ 
-        success: false, 
-        message: "שגיאה בביצוע הפעולה", 
-        error: error.message 
+      res.status(500).json({
+        success: false,
+        message: "שגיאה בביצוע הפעולה",
+        error: error.message
       });
     }
   };

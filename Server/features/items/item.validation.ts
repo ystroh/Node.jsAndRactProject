@@ -19,4 +19,9 @@ export const idSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, "מזהה לא ת�
 export const createItemSchema = baseItemSchema;
 
 // - UPDATE: משתמשים ב-partial שמאפשר לעדכן רק חלק מהשדות
-export const updateItemSchema = baseItemSchema.partial();
+// בקובץ ה-Schema בשרת:
+export const updateItemSchema = baseItemSchema.partial().extend({
+  // אנחנו דורסים את ה-ownerId בסכמת העדכון כדי שלא יכשל אם מגיע אובייקט
+  ownerId: z.any().optional(), 
+  status: z.enum(['available', 'borrowed', 'archived']).optional()
+});

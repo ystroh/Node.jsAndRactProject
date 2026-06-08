@@ -9,7 +9,8 @@ router.post('/', requestController.create.bind(requestController));
 
 router.put('/:requestId/approve', requestController.approveRequest);
 // 2. קבלת הבקשות של משתמש ספציפי: GET /api/requests/user/:userId
-router.get('/user/:userId', requestController.getMyRequests.bind(requestController));
+// נשארים רק עם הנתיב הזה
+router.get('/', requestController.getMyRequests.bind(requestController));
 
 // 3. עדכון סטטוס בקשה (אישור/דחייה): PATCH /api/requests/:id/status
 router.patch('/:id/status', requestController.updateStatus.bind(requestController));

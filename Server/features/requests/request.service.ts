@@ -5,6 +5,7 @@ import { AppError } from '../../utils/AppError';
 import { logger } from '../../logger/logger';
 import { sendEmail } from '../../utils/email.service';
 import { requestQueue } from './request.queue';
+import { log } from 'console';
 
 export class RequestService {
   async createRequest(requestData: any): Promise<IRequest> {
@@ -101,17 +102,30 @@ export const handleNewRequestNotification = async (requestId: string) => {
   const item = requestData.itemId as any;
   const owner = item?.ownerId as any;
   const requester = requestData.requesterId as any;
+  const message = (requestData as any).message;
 
   if (!owner?.email) {
     logger.error({ requestId, owner }, 'Worker: Owner email missing');
     throw new Error('Owner email missing');
   }
 
+  console.log('DEBUG: Sending email with:', {
+    ownerName: owner.name,
+    requesterName: requester.name,
+    message: (requestData as any).message
+  });
   await sendEmail({
     to: owner.email,
-    subject: `New request for: ${item?.title}`,
-    text: `User ${requester?.name} requested your item: ${item?.title}`,
-    html: `<h2>Hello ${owner.name},</h2><p>New request for ${item?.title}</p>`
+    subject: `בקשה חדשה עבור: ${item?.title}`,
+    text: `המשתמש ${requester?.name} ביקש את הפריט שלך: ${item?.title}. הודעה: ${message}`,
+    html: `
+      <h2>שלום ${owner.name},</h2>
+      <p>יש לנו בקשה חדשה עבור הפריט שלך: <strong>${item?.title}</strong>.</p>
+      <p><strong>המבקש:</strong> ${requester?.name}</p>
+      <p><strong>ההודעה של המבקש:</strong> <em>"${message || 'לא צורפה הודעה'}"</em></p>
+      <hr />
+      <p>באפשרותך להיכנס למערכת כדי לאשר או לדחות את הבקשה.</p>
+    `
   });
 
   logger.info({ requestId, to: owner.email }, 'Worker: Notification email sent successfully');
@@ -149,22 +163,49 @@ export const handleApprovedRequestLogic = async (requestId: string, isApproved: 
 
     // Notify Winner
     if (requester?.email) {
-      await sendEmail({ to: requester.email, subject: 'Request Approved', text: 'Congratulations!', html: '...' });
+      await sendEmail({
+        to: requester.email,
+        subject: 'הבקשה שלך אושרה!',
+        text: `מזל טוב! הבקשה עבור ${item?.title} אושרה.`,
+        html: `
+          <h2>שלום ${requester.name},</h2>
+          <p>יש לנו חדשות טובות!</p>
+          <p>הבעלים אישר את הבקשה שלך עבור הפריט: <strong>${item?.title}</strong>.</p>
+          <br>
+          <p>ניתן לתאם את האיסוף מול בעל הפריט.</p>
+        `
+      });
       logger.info({ requestId, to: requester.email }, 'Worker: Approved email sent to winner');
     }
 
     // Notify Rejected
-    const rejectedRequests = await RequestModel.find({ itemId: item._id, status: 'rejected' }).populate('requesterId', 'email');
+    const rejectedRequests = await RequestModel.find({ itemId: item._id, status: 'rejected' }).populate('requesterId', 'email name');
     for (const req of rejectedRequests) {
       const user = req.requesterId as any;
       if (user?.email) {
-        await sendEmail({ to: user.email, subject: 'Update', text: 'Not this time.', html: '...' });
+        await sendEmail({
+          to: user.email,
+          subject: 'עדכון בנוגע לבקשתך',
+          text: 'הבקשה עבור הפריט נדחתה.',
+          html: `<p>שלום ${user.name},</p>
+         <p>הצטערנו להודיע שהבקשה עבור הפריט <strong>${item?.title}</strong> לא אושרה הפעם.</p>`
+        });
         logger.info({ rejectedRequestId: req._id, to: user.email }, 'Worker: Rejection email sent');
       }
     }
   } else {
+    // Notify Requester - דחייה!
     if (requester?.email) {
-      await sendEmail({ to: requester.email, subject: 'Declined', text: 'Sorry.', html: '...' });
+      await sendEmail({
+        to: requester.email,
+        subject: 'עדכון בנוגע לבקשתך',
+        text: `לצערנו, הבקשה עבור ${item?.title} נדחתה.`,
+        html: `
+          <h2>שלום ${requester.name},</h2>
+          <p>לצערנו, הבקשה שלך עבור הפריט <strong>${item?.title}</strong> לא אושרה הפעם.</p>
+          <p>נשמח אם תנסה להשאיל פריט אחר בהמשך.</p>
+        `
+      });
       logger.info({ requestId, to: requester.email }, 'Worker: Decline email sent');
     }
   }

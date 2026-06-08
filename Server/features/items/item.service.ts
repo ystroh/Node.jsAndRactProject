@@ -46,8 +46,8 @@ export class ItemService {
     }).populate('ownerId', 'name email');
   }
   async updateItem(itemId: string, updateData: any): Promise<IItem> {
-    idSchema.parse(itemId); // וולידציה ל-ID
-    const validatedData = updateItemSchema.parse(updateData);
+      idSchema.parse(itemId); 
+   const validatedData = updateItemSchema.parse(updateData);
 
     const updatedItem = await ItemModel.findByIdAndUpdate(itemId, validatedData, { new: true });
     if (!updatedItem) throw new AppError('הפריט לא נמצא במערכת', 404);
