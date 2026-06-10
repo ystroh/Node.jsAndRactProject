@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useProducts } from '../context/ProductContext';
+import { ProductProvider, useProducts } from '../context/ProductContext';
 import { ProductCard } from '../components/productComponents/ProductToShow';
 import { RequestForm } from '../components/requestComponents/RequestForm';
 import { Product } from '../types';
@@ -51,8 +51,10 @@ export const CatalogPage = () => {
 
 export default function ReceiverDashboard() {
   return (
-    <RequestsProvider>
-      <CatalogPage />
-    </RequestsProvider>
+ <ProductProvider>
+      <RequestsProvider>
+        <CatalogPage />
+      </RequestsProvider>
+    </ProductProvider>
   )
 }

@@ -2,14 +2,17 @@ const API_BASE = '/api';
 
 export async function createRequest(payload: { itemId: string; message: string }) {
   const requesterId = getUserId();
-  
+
+  // include requesterId in body (server validation expects it) and also set header
+  const body = { ...payload, requesterId } as any;
+
   const res = await fetch(`${API_BASE}/requests`, {
     method: 'POST',
-    headers: { 
+    headers: {
       'Content-Type': 'application/json',
-      'x-user-id': requesterId || '' // העברה ב-Header במקום ב-Body
+      'x-user-id': requesterId || ''
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
   return handleRes(res);
 }

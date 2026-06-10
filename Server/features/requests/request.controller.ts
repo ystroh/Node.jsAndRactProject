@@ -7,6 +7,12 @@ export class RequestController {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      // If the client didn't include requesterId in the body, try to read it from header
+      const headerUserId = (req.headers['x-user-id'] as string) || undefined;
+      if (!req.body.requesterId && headerUserId) {
+        req.body.requesterId = headerUserId;
+      }
+
       const newRequest = await requestService.createRequest(req.body);
       res.status(201).json({ message: 'הבקשה נוצרה בהצלחה', request: newRequest });
     } catch (error) {

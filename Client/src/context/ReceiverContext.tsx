@@ -33,7 +33,7 @@ export const RequestsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         try {
             await api.deleteRequest(requestId) // קריאה ל-API
             // עדכון הסטייט המקומי: מסירים את הבקשה שמחקנו
-            setMyRequests((prev) => prev.filter((r) => r.id !== requestId))
+            setMyRequests((prev) => prev.filter((r) => (r._id || r.id) !== requestId))
         } catch (err) {
             console.error("Error deleting request:", err)
             throw err // זורקים את השגיאה כדי שנוכל לטפל בה ב-UI אם צריך

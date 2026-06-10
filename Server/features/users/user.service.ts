@@ -64,7 +64,7 @@ async createUser(userData: any): Promise<IUser> {
   async login(email: string, password: string): Promise<{ user: IUser, token: string }> {
     // 1. מציאת משתמש
     const user = await User.findOne({ email }).select('+passwordHash');
-    if (!user) throw new AppError('אימייל או סיסמה שגויים', 401);
+    if (!user) throw new AppError('USER_NOT_FOUND', 404);
 
     // 2. בדיקת סיסמה
     const isMatch = await bcrypt.compare(password, user.passwordHash);

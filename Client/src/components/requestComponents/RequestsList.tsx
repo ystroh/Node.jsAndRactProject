@@ -21,7 +21,7 @@ export const MyRequestsList = () => {
         <div style={{ display: 'grid', gap: 10 }}>
           {myRequests.map((req) => (
             <RequestItem 
-              key={req.id} 
+              key={req._id} 
               request={req} 
               onDelete={deleteRequest} // מעבירים את הפונקציה מהקונטקסט
             />
