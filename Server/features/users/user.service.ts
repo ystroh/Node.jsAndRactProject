@@ -1,5 +1,5 @@
 import { User, IUser } from './user.model';
-import { createUserSchema, loginUserSchema } from './user.validation';
+import { createUserSchema, loginUserSchema, updateUserSchema } from './user.validation';
 import { AppError } from '../../utils/AppError'; // וודאי שהנתיב נכון
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -70,9 +70,25 @@ async createUser(userData: any): Promise<IUser> {
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) throw new AppError('אימייל או סיסמה שגויים', 401);
 
-    // 3. יצירת טוקן
+    // 3. יצירת טוקן — כולל תפקידים ותוקף קצר
     const secret = process.env.JWT_SECRET || 'default-secret';
-    const token = jwt.sign({ id: user._id }, secret);
+    const token = jwt.sign({ id: user._id, roles: user.roles }, secret, { expiresIn: '2h' });
     return { user, token };
+  }
+
+  async updateUser(userId: string, payload: any): Promise<IUser> {
+    const validated = updateUserSchema.parse(payload);
+
+    // hash password if provided
+    if ((validated as any).password) {
+      const salt = await bcrypt.genSalt(10);
+      (validated as any).passwordHash = await bcrypt.hash((validated as any).password, salt);
+      delete (validated as any).password;
+    }
+
+    const updated = await User.findByIdAndUpdate(userId, validated, { new: true }).select('-passwordHash');
+    if (!updated) throw new AppError('User not found', 404);
+    logger.info({ userId }, 'User updated');
+    return updated as IUser;
   }
 }

@@ -8,7 +8,8 @@ export class ItemService {
 
   // פונקציה תומכת Pagination
   async getAllItems(page?: number, limit?: number): Promise<IItem[]> {
-    const query = ItemModel.find({ status: 'available' }).populate('ownerId', 'name email');
+    // Return all items (do not filter by status) so catalog shows all DB items.
+    const query = ItemModel.find({}).populate('ownerId', 'name email');
     
     if (page && limit) {
       const skip = (page - 1) * limit;
@@ -35,7 +36,8 @@ export class ItemService {
   }
 
   async getItemsByCategory(categoryName: ItemCategory): Promise<IItem[]> {
-    return await ItemModel.find({ category: categoryName, status: 'available' }).populate('ownerId', 'name email');
+    // Return items of this category regardless of status so users can see archived/borrowed items too.
+    return await ItemModel.find({ category: categoryName }).populate('ownerId', 'name email');
   }
 
   async getItemsByOwner(ownerId: string): Promise<IItem[]> {
@@ -44,6 +46,11 @@ export class ItemService {
     return await ItemModel.find({
       ownerId: new Types.ObjectId(validatedId) as any // הוספת as any פותרת את התנגשות הטיפוסים
     }).populate('ownerId', 'name email');
+  }
+
+  async getItemById(itemId: string): Promise<IItem | null> {
+    idSchema.parse(itemId);
+    return await ItemModel.findById(itemId).populate('ownerId', 'name email');
   }
   async updateItem(itemId: string, updateData: any): Promise<IItem> {
       idSchema.parse(itemId); 

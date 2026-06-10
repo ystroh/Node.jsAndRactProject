@@ -11,6 +11,9 @@ router.get('/', itemController.getAll.bind(itemController));
 // 2. קבלת כל הפריטים ששייכים למשתמש ספציפי
 router.get('/user/:userId', itemController.getByUser.bind(itemController));
 
+// Get single item by id
+router.get('/:id', itemController.getById.bind(itemController));
+
 // 3. עדכון ומחיקת פריט לפי ה-ID שלו
 router.patch('/:id', itemController.update.bind(itemController));
 router.delete('/:id', itemController.delete.bind(itemController));

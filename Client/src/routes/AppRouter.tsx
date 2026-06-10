@@ -4,9 +4,10 @@ import { RegisterPage } from "../pages/RegisterPage";
 import GiverDashboardPage from "../pages/GiverDashboard";
 
 import ReceiverDashboard from "../pages/ReceiverDashboard";
+import ReceiverRequestsPage from "../pages/ReceiverRequests";
 import { HomePage } from '../pages/HomePage';
 import { ProtectedRoute } from './ProtactedRoute';
-// import { AdminDashboard } from "../pages/AdminDashboard";
+import AdminDashboard from "../pages/AdminDashboard";
 
 
 
@@ -15,11 +16,7 @@ export const AppRouter = () => {
     <Route path="/" element={<LoginPage />} />
     <Route path="/register" element={<RegisterPage />} />
     <Route path="/home" element={<HomePage />} />
-    {/* <Route path="/admin" element={
-      <ProtectedRoute allowedRoles={['admin']}>
-        <AdminDashboard />
-      </ProtectedRoute>
-    } /> */}
+
 
     <Route path="/giver" element={
       <ProtectedRoute allowedRoles={['giver', 'admin']}>
@@ -33,7 +30,17 @@ export const AppRouter = () => {
       </ProtectedRoute>
     } />
 
-    {/* <Route path="/admin" element={<AdminDashboard />} /> */}
+    <Route path="/receiver/requests" element={
+      <ProtectedRoute allowedRoles={['receiver', 'admin']}>
+        <ReceiverRequestsPage />
+      </ProtectedRoute>
+    } />
+
+    <Route path="/admin" element={
+      <ProtectedRoute allowedRoles={['admin']}>
+        <AdminDashboard />
+      </ProtectedRoute>
+    } />
   </Routes>
   );
 };

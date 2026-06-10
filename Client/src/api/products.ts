@@ -15,7 +15,11 @@ export async function getProductsByOwner(ownerId: string): Promise<Product[]> {
   const res = await fetch(`${API_BASE}/items/user/${encodeURIComponent(ownerId)}`)
   const data = await handleRes(res)
   // normalize Mongoose _id -> id for client usage
-  return (Array.isArray(data) ? data : []).map((it: any) => ({ ...(it || {}), id: it.id ?? it._id }))
+  return (Array.isArray(data) ? data : []).map((it: any) => {
+    const owner = it?.ownerId
+    const normalizedOwnerId = owner && typeof owner === 'object' ? (owner.id ?? owner._id) : owner
+    return ({ ...(it || {}), id: it.id ?? it._id, ownerId: normalizedOwnerId })
+  })
 }
 
 // Create item -> POST /api/items
@@ -62,7 +66,21 @@ export async function approveRequest(productId: string, requestId: string, isApp
 export async function getAllProducts(): Promise<Product[]> {
   const res = await fetch(`${API_BASE}/items`);
   const data = await handleRes(res);
-  return (Array.isArray(data) ? data : []).map((it: any) => ({ ...(it || {}), id: it.id ?? it._id }));
+  return (Array.isArray(data) ? data : []).map((it: any) => {
+    const owner = it?.ownerId
+    const normalizedOwnerId = owner && typeof owner === 'object' ? (owner.id ?? owner._id) : owner
+    return { ...(it || {}), id: it.id ?? it._id, ownerId: normalizedOwnerId }
+  });
+}
+
+// Get single product by id -> GET /api/items/:id
+export async function getProductById(id: string): Promise<Product> {
+  const res = await fetch(`${API_BASE}/items/${encodeURIComponent(id)}`)
+  const data = await handleRes(res)
+  const it = data as any
+  const owner = it?.ownerId
+  const normalizedOwnerId = owner && typeof owner === 'object' ? (owner.id ?? owner._id) : owner
+  return { ...(it || {}), id: it.id ?? it._id, ownerId: normalizedOwnerId }
 }
 
 

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react'
+import * as requestsApi from '../api/requests'
 import { ProductProvider, useProducts } from '../context/ProductContext'
 import ProductList from '../components/productComponents/ProductList'
 import ProductForm from '../components/productComponents/ProductForm'
@@ -13,6 +14,33 @@ function Inner() {
     const ownerId = localStorage.getItem('ownerId') || localStorage.getItem('userId');
     return products.filter((p) => p.ownerId === ownerId);
   }, [products]); // יתעדכן בכל פעם שרשימת ה-products המלאה משתנה
+
+  // load requests for owner's items and attach to products for display
+  const [ownerRequests, setOwnerRequests] = useState<any[]>([])
+
+  React.useEffect(() => {
+    let mounted = true
+    async function loadOwnerRequests() {
+      try {
+        const data = await requestsApi.getRequestsForOwner()
+        if (!mounted) return
+        setOwnerRequests(Array.isArray(data) ? data : [])
+      } catch (err) {
+        console.error('Failed loading owner requests', err)
+      }
+    }
+    loadOwnerRequests()
+    return () => { mounted = false }
+  }, [])
+
+  // attach requests to products for rendering in ProductCard
+  const myProductsWithRequests = React.useMemo(() => {
+    return myProducts.map(p => ({ ...p, requests: ownerRequests.filter(r => {
+      const item = r.itemId
+      const itemId = typeof item === 'object' ? (item.id ?? item._id) : item
+      return String(itemId) === String(p.id || p.id)
+    }) }))
+  }, [myProducts, ownerRequests])
 
   async function handleSave(payload: Partial<Product>) {
     if (editing) {
@@ -42,13 +70,21 @@ function Inner() {
       {error && <div style={{ color: 'red' }}>{error}</div>}
 
       <ProductList
-        products={myProducts}
+        products={myProductsWithRequests}
         onEdit={(p) => { setEditing(p); setShowForm(true) }}
         onDelete={async (id) => { if (confirm('Delete product?')) await deleteProduct(id) }}
         onApproveRequest={async (productId, requestId, isApproved) => {
           const action = isApproved ? 'Approve' : 'Reject';
-          if (confirm(`Are you sure you want to ${action} this request?`)) {
+          if (!confirm(`Are you sure you want to ${action} this request?`)) return
+          try {
             await approveRequest(productId, requestId, isApproved)
+            // refresh owner requests and products
+            const refreshed = await requestsApi.getRequestsForOwner()
+            setOwnerRequests(Array.isArray(refreshed) ? refreshed : [])
+            await reload()
+          } catch (err) {
+            console.error('Approve request failed', err)
+            alert('Failed to change request status')
           }
         }}
       />

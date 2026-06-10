@@ -13,9 +13,10 @@ export const ProductCard = ({ product, onSelect }: Props) => {
       <p>{product.description}</p>
       <button 
         onClick={() => onSelect(product)}
-        style={{ padding: '8px 16px', cursor: 'pointer' }}
+        disabled={product.status === 'archived'}
+        style={{ padding: '8px 16px', cursor: product.status === 'archived' ? 'not-allowed' : 'pointer', opacity: product.status === 'archived' ? 0.6 : 1 }}
       >
-        Request Item
+        {product.status === 'archived' ? 'לא זמין' : 'Request Item'}
       </button>
     </div>
   );

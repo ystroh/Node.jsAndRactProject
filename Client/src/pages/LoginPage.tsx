@@ -26,6 +26,8 @@ const handleLogin = async (e: React.FormEvent) => {
     localStorage.setItem('ownerId', user._id);
     localStorage.setItem('token', token);
     localStorage.setItem('userRoles', JSON.stringify(user.roles));
+    // store user name for greetings
+    if (user.name) localStorage.setItem('userName', user.name);
     
     navigate('/home');
   } catch (err: any) {

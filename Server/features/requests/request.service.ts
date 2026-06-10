@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import { RequestModel, IRequest } from './request.model';
+import { ItemModel } from '../items/item.model';
 import { createRequestSchema, updateStatusSchema, idSchema } from './request.validation';
 import { AppError } from '../../utils/AppError';
 import { logger } from '../../logger/logger';
@@ -38,6 +39,14 @@ export class RequestService {
     }).populate('itemId');
   }
 
+  // ADMIN: get all requests (with populated item and requester)
+  async getAllRequests(): Promise<IRequest[]> {
+    return await RequestModel.find().populate({
+      path: 'itemId',
+      populate: { path: 'ownerId', select: 'name email' }
+    }).populate('requesterId', 'name email');
+  }
+
   async updateRequestStatus(requestId: string, statusData: any): Promise<IRequest> {
     idSchema.parse(requestId);
     const { status } = updateStatusSchema.parse(statusData);
@@ -61,7 +70,18 @@ export class RequestService {
     logger.info({ requestId }, 'Request deleted');
     return deletedRequest;
   }
+  async getRequestsForOwner(ownerId: string): Promise<IRequest[]> {
+    idSchema.parse(ownerId);
 
+    return await RequestModel.find()
+      .populate({
+        path: 'itemId',
+        match: { ownerId: new Types.ObjectId(ownerId) }, // כאן קורה הקסם: סינון בתוך ה-populate
+        populate: { path: 'ownerId', select: 'name email' }
+      })
+      .populate('requesterId', 'name email')
+      .then(requests => requests.filter(r => r.itemId !== null)); // מסירים בקשות שה-itemId שלהן לא התאים לסינון
+  }
   async approveRequest(requestId: string, isApproved: boolean): Promise<void> {
     logger.info({ requestId, isApproved }, 'Attempting to approve/reject request');
 

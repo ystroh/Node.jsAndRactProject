@@ -12,6 +12,12 @@ router.post('/login', userController.login.bind(userController));
 // נתיב לרישום משתמש חדש: POST /api/users/register
 router.post('/register',userController.register.bind(userController));
 
+// ADMIN: create user (reuse register logic but protected)
+router.post('/', protect, restrictTo('admin'), userController.register.bind(userController));
+
+// ADMIN: update user
+router.patch('/:id', protect, restrictTo('admin'), userController.updateUser.bind(userController));
+
 // נתיב לקבלת כל המשתמשים: GET /api/users
 router.get('/', protect,restrictTo('admin'),userController.getUsers.bind(userController));
 

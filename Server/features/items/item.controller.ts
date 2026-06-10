@@ -50,6 +50,20 @@ export class ItemController {
     }
   }
 
+  async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+      const item = await itemService.getItemById(id as string);
+      if (!item) {
+        res.status(404).json({ message: 'Item not found' });
+        return;
+      }
+      res.status(200).json(item);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;

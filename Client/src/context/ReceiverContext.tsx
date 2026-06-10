@@ -6,6 +6,7 @@ type RequestsContextValue = {
     loading: boolean
     submitRequest: (itemId: string, message: string) => Promise<void>
     fetchMyRequests: () => Promise<void>
+    fetchAllRequests:()=> Promise<void>
     deleteRequest: (requestId: string) => Promise<void>
 }
 
@@ -19,6 +20,15 @@ export const RequestsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setLoading(true)
         try {
             const data = await api.getMyRequests()
+            setMyRequests(data)
+        } finally { setLoading(false) }
+    }
+
+    
+    async function fetchAllRequests() {
+        setLoading(true)
+        try {
+            const data = await api.getAllRequests()
             setMyRequests(data)
         } finally { setLoading(false) }
     }
@@ -43,7 +53,7 @@ export const RequestsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     return (
-        <RequestsContext.Provider value={{ myRequests, loading, submitRequest, fetchMyRequests, deleteRequest }}>
+        <RequestsContext.Provider value={{ myRequests, loading, submitRequest, fetchMyRequests,fetchAllRequests, deleteRequest }}>
             {children}
         </RequestsContext.Provider>
     )

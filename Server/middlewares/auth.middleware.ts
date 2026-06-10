@@ -29,12 +29,12 @@ export const protect = async (req: Request, res: Response, next: NextFunction): 
     }
 
     // 3. אימות ופענוח הטוקן
-    const decoded = jwt.verify(token, 'my-super-secret-key-12345') as { id: string; roles: string[] };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret') as { id: string; roles?: string[] };
 
-    // 4. הזרקת נתוני המשתמש לתוך אובייקט הבקשה (req) כדי שהקונטרולר הבא יוכל להשתמש בהם
+    // 4. הזרקת נתוני המשתמש לתוך אובייקט הבקשה (req) — דואגים ש־roles תמיד יהיה מערך
     req.user = {
       id: decoded.id,
-      roles: decoded.roles
+      roles: Array.isArray(decoded.roles) ? decoded.roles : []
     };
 
     // 5. הכל תקין! עוברים לקונטרולר
@@ -56,7 +56,8 @@ export const restrictTo = (...allowedRoles: string[]) => {
 
     // 2. בדיקה האם לפחות אחד מהתפקידים של המשתמש נמצא ברשימת התפקידים המותרים
     // (משתמשים במתודת .some בגלל ששדה roles אצלך הוא מערך של סטרינגים)
-    const hasPermission = req.user.roles.some(role => allowedRoles.includes(role));
+    const roles = Array.isArray(req.user.roles) ? req.user.roles : []
+    const hasPermission = roles.some(role => allowedRoles.includes(role));
 
     // 3. אם אין לו אף תפקיד מתאים - חוסמים אותו עם שגיאה 403 (Forbidden)
     if (!hasPermission) {

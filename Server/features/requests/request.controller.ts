@@ -35,6 +35,29 @@ export class RequestController {
     }
   }
 
+  async getAllRequests(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const requests = await requestService.getAllRequests();
+      res.status(200).json(requests);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getRequestsForOwner(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const ownerId = req.user?.id;
+      if (!ownerId) {
+        res.status(401).json({ message: 'Unauthorized' });
+        return;
+      }
+      const requests = await requestService.getRequestsForOwner(ownerId);
+      res.status(200).json(requests);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async updateStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;

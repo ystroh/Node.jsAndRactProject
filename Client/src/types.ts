@@ -1,6 +1,6 @@
 export type RequestItem = {
     id: string
-    requesterId: string
+    requesterId: string | { name?: string; email?: string; _id?: string; id?: string }
     status: 'pending' | 'approved' | 'rejected'
 }
 
@@ -10,6 +10,7 @@ export type Product = {
     description?: string
     image?: string
     ownerId: string
-    category: string; // תוסיפי את השורה הזו
+    category: string; 
+    status?: 'available' | 'borrowed' | 'archived'
     requests?: RequestItem[]
 }
