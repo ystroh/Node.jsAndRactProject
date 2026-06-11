@@ -36,19 +36,19 @@ body{
 	display:flex;
 	align-items:center;
 	justify-content:space-between;
-	gap:16px;
-	padding:18px 24px;
+	gap:20px;
+	padding:20px 28px;
 	border-radius:16px;
 	background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
 	backdrop-filter: blur(6px);
-	margin-bottom:24px;
+	margin-bottom:28px;
 }
-.brand{display:flex;align-items:center;gap:12px}
-.brand__logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;color:#04141b}
-.brand__title{font-weight:700;font-size:18px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand__logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#04141b;font-size:18px}
+.brand__title{font-weight:800;font-size:20px;letter-spacing:0.8px}
 
-.nav{display:flex;gap:12px;align-items:center}
-.nav a{color:var(--muted);text-decoration:none;padding:8px 12px;border-radius:10px}
+.nav{display:flex;gap:18px;align-items:center}
+.nav a{color:var(--muted);text-decoration:none;padding:10px 14px;border-radius:10px;font-size:15px}
 .nav a.active, .nav a:hover{color:var(--text);background:var(--glass)}
 
 /* Cards */
