@@ -65,30 +65,33 @@ export const RegisterPage = () => {
     };
 
     return (
-        <div style={styles.container}>
-            <form onSubmit={handleRegister} style={styles.card}>
-                <h2 style={{ textAlign: 'center' }}>יצירת חשבון חדש</h2>
+        <div className="auth-page">
+            <form onSubmit={handleRegister} className="auth-card animate-fade-up">
+                <h2 className="auth-title">יצירת חשבון חדש</h2>
                 
-                <input type="text" placeholder="שם מלא" style={styles.input} onChange={(e) => setFormData({...formData, name: e.target.value})} required />
-                <input type="email" placeholder="אימייל" style={styles.input} onChange={(e) => setFormData({...formData, email: e.target.value})} required />
-                <input type="password" placeholder="סיסמה" style={styles.input} onChange={(e) => setFormData({...formData, password: e.target.value})} required />
+                <input className="form-input" type="text" placeholder="שם מלא" onChange={(e) => setFormData({...formData, name: e.target.value})} required />
+                <input className="form-input" type="email" placeholder="אימייל" onChange={(e) => setFormData({...formData, email: e.target.value})} required />
+                <input className="form-input" type="password" placeholder="סיסמה" onChange={(e) => setFormData({...formData, password: e.target.value})} required />
 
-                <div style={{ margin: '15px 0' }}>
-                    <label>בחר תפקיד:</label>
-                    <div style={{ marginTop: '10px' }}>
-                        <label><input type="checkbox" checked={formData.roles.includes('giver')} onChange={() => toggleRole('giver')} /> מוסר</label>
-                        <label style={{ margin: '0 10px' }}><input type="checkbox" checked={formData.roles.includes('receiver')} onChange={() => toggleRole('receiver')} /> מקבל</label>
+                <div style={{ margin: '12px 0' }}>
+                    <div className="muted-small">בחר תפקיד:</div>
+                    <div style={{ marginTop: '10px', display:'flex', gap:12 }}>
+                        <label className="tag"><input type="checkbox" checked={formData.roles.includes('giver')} onChange={() => toggleRole('giver')} /> &nbsp;מוסר</label>
+                        <label className="tag"><input type="checkbox" checked={formData.roles.includes('receiver')} onChange={() => toggleRole('receiver')} /> &nbsp;מקבל</label>
                         {isAdmin && (
-                            <label><input type="checkbox" checked={formData.roles.includes('admin')} onChange={() => toggleRole('admin')} /> מנהל</label>
+                            <label className="tag"><input type="checkbox" checked={formData.roles.includes('admin')} onChange={() => toggleRole('admin')} /> &nbsp;מנהל</label>
                         )}
                     </div>
                 </div>
 
-                {error && <p style={{ color: 'red', fontSize: '14px' }}>{error}</p>}
+                {error && <p style={{ color: '#ff6b6b', fontSize: '14px' }}>{error}</p>}
                 
-                <button type="submit" style={styles.button} disabled={loading}>
-                    {loading ? 'רושם...' : 'הירשם'}
-                </button>
+                <div className="form-actions">
+                    <button type="submit" className="btn btn--primary" disabled={loading}>
+                        {loading ? 'רושם...' : 'הירשם'}
+                    </button>
+                    <div className="muted-small">כבר רשום? <a href="/">התחבר</a></div>
+                </div>
             </form>
         </div>
     );

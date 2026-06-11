@@ -2,9 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useProducts, ProductProvider } from '../context/ProductContext'
 import ProductList from '../components/productComponents/ProductList'
+import EditProductModal from '../components/productComponents/EditProductModal'
 import { useRequests, RequestsProvider } from '../context/ReceiverContext'
 import { RequestItem } from '../components/requestComponents/RequestItem'
 import * as usersApi from '../api/users'
+import EditUserModal from '../components/common/EditUserModal'
 
 const TAB_USERS = 'users'
 const TAB_ITEMS = 'items'
@@ -101,85 +103,122 @@ export function AdminInner() {
 		} catch (err) { console.error(err); alert(String(err)) }
 	}
 
+	const [editingProductModal, setEditingProductModal] = useState<any | null>(null)
+
+	useEffect(() => {
+		console.log('editingProductModal state changed:', editingProductModal && (editingProductModal.id || editingProductModal._id || editingProductModal.title))
+	}, [editingProductModal])
+
+	useEffect(() => {
+		console.log('editingUser state changed:', editingUser && (editingUser._id || editingUser.id || editingUser.email || editingUser.name))
+	}, [editingUser])
+
 	async function handleEditProduct(p: any) {
-		const newTitle = prompt('New title', p.title)
-		if (newTitle == null) return
-		try { await updateProduct(p.id, { ...p, title: newTitle }) } catch (err) { console.error(err) }
+		// open modal
+		console.log('open edit modal for', p && (p.id || p._id || p.title))
+		setEditingProductModal(p)
+	}
+
+	async function handleSaveProduct(updated: any){
+		try{
+			await updateProduct(updated.id || updated._id, updated)
+			setEditingProductModal(null)
+		}catch(err){
+			console.error('Failed save product', err)
+			alert('שגיאה בשמירת הפריט')
+		}
 	}
 
 	return (
-		<div style={{ padding: 20 }}>
-			<h1>Admin Dashboard</h1>
+		<div className="page">
+			<div style={{ padding: 6 }}>
+				<h1 className="page-title">לוח ניהול</h1>
 
-			<div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-				<button onClick={() => setActiveTab(TAB_USERS)} style={{ padding: 8, background: activeTab===TAB_USERS? '#184e77':'#eee', color: activeTab===TAB_USERS? 'white':'black' }}>ניהול משתמשים</button>
-				<button onClick={() => setActiveTab(TAB_ITEMS)} style={{ padding: 8, background: activeTab===TAB_ITEMS? '#184e77':'#eee', color: activeTab===TAB_ITEMS? 'white':'black' }}>כל הפריטים</button>
-				<button onClick={() => setActiveTab(TAB_REQUESTS)} style={{ padding: 8, background: activeTab===TAB_REQUESTS? '#184e77':'#eee', color: activeTab===TAB_REQUESTS? 'white':'black' }}>בקשות</button>
-			</div>
+				<div className="tabs" role="tablist">
+					<button className={`tab ${activeTab===TAB_USERS? 'active':''}`} onClick={() => setActiveTab(TAB_USERS)}>ניהול משתמשים</button>
+					<button className={`tab ${activeTab===TAB_ITEMS? 'active':''}`} onClick={() => setActiveTab(TAB_ITEMS)}>כל הפריטים</button>
+					<button className={`tab ${activeTab===TAB_REQUESTS? 'active':''}`} onClick={() => setActiveTab(TAB_REQUESTS)}>בקשות</button>
+				</div>
 
-			{activeTab === TAB_USERS && (
-				<div>
-					<h2>Users</h2>
-					<div style={{ marginBottom: 10 }}>
-						<input placeholder="חיפוש משתמשים" value={usersQuery} onChange={(e) => setUsersQuery(e.target.value)} />
-						<button onClick={loadUsers} style={{ marginLeft: 8 }}>רענן</button>
-					</div>
-					{usersLoading ? <div>Loading...</div> : usersError ? <div style={{ color: 'red' }}>{usersError}</div> : (
-						<div style={{ display: 'grid', gap: 8 }}>
-							<div style={{ marginBottom: 10 }}>
-								<button onClick={() => setShowAddForm((s) => !s)}>{showAddForm ? 'Close' : 'Add user'}</button>
-							</div>
-							{showAddForm && (
-								<AddUserForm onCancel={() => setShowAddForm(false)} onCreate={handleCreateUser} />
-							)}
-							{filteredUsers.map(u => (
-								<div key={u._id || u.id} style={{ border: '1px solid #ddd', padding: 10, borderRadius: 6, display: 'flex', justifyContent: 'space-between' }}>
-									<div>
-										<div><strong>{u.name}</strong> ({u.email})</div>
-										<div>Roles: {Array.isArray(u.roles)? u.roles.join(', '): u.roles}</div>
-									</div>
-									<div style={{ display: 'flex', gap: 8 }}>
-										<button onClick={() => setEditingUser(u)} style={{ padding: '6px 10px' }}>ערוך</button>
-										<button onClick={() => { if(confirm('למחוק משתמש?')) handleDeleteUser(u._id || u.id) }} style={{ background:'#ff4d4f', color:'white', border:'none', padding:'6px 10px' }}>מחק</button>
-									</div>
+				{activeTab === TAB_USERS && (
+					<div className="panel">
+						<h2 className="muted-small">Users</h2>
+						<div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+							<input className="form-input" placeholder="חיפוש משתמשים" value={usersQuery} onChange={(e) => setUsersQuery(e.target.value)} />
+							<button className="btn btn--ghost" onClick={loadUsers}>רענן</button>
+						</div>
+
+						{usersLoading ? <div>Loading...</div> : usersError ? <div style={{ color: 'red' }}>{usersError}</div> : (
+							<div className="compact-grid">
+								<div style={{ marginBottom: 10 }}>
+									<button className="btn btn--primary" onClick={() => setShowAddForm((s) => !s)}>{showAddForm ? 'סגור' : 'הוסף משתמש'}</button>
 								</div>
-							))}
-							{editingUser && (
-								<EditUserForm user={editingUser} onCancel={() => setEditingUser(null)} onSave={(p:any) => handleUpdateUser(editingUser._id || editingUser.id, p)} />
-							)}
-						</div>
-					)}
-				</div>
-			)}
+								{showAddForm && (
+									<div className="list-card">
+										<AddUserForm onCancel={() => setShowAddForm(false)} onCreate={handleCreateUser} />
+									</div>
+								)}
 
-			{activeTab === TAB_ITEMS && (
-				<div>
-					<h2>Items</h2>
-					<div style={{ marginBottom: 10 }}>
-						<input placeholder="חיפוש פריטים" value={itemsQuery} onChange={(e) => setItemsQuery(e.target.value)} />
-					</div>
-					{productsLoading ? <div>Loading...</div> : (
-						<ProductList products={filteredItems} onEdit={handleEditProduct} onDelete={deleteProduct} onApproveRequest={approveRequest} />
-					)}
-				</div>
-			)}
+								{filteredUsers.map(u => (
+									<div key={u._id || u.id} className="user-row">
+										<div className="user-meta">
+											<div><strong>{u.name}</strong> ({u.email})</div>
+											<div className="muted-small">Roles: {Array.isArray(u.roles)? u.roles.join(', '): u.roles}</div>
+										</div>
+										<div style={{ display: 'flex', gap: 8 }}>
+											<button className="btn btn--ghost" onClick={() => { console.log('open edit user', u && (u._id || u.id || u.email)); setEditingUser(u) }}>ערוך</button>
+											<button className="btn btn--danger" onClick={() => { if(confirm('למחוק משתמש?')) handleDeleteUser(u._id || u.id) }}>מחק</button>
+										</div>
+									</div>
+								))}
 
-			{activeTab === TAB_REQUESTS && (
-				<div>
-					<h2>Requests</h2>
-					<div style={{ marginBottom: 10 }}>
-						<input placeholder="חפש בקשות" value={requestsQuery} onChange={(e) => setRequestsQuery(e.target.value)} />
-						<button onClick={() => fetchAllRequests()} style={{ marginLeft: 8 }}>רענן</button>
+								{editingUser && (
+											<EditUserModal user={editingUser} onCancel={() => setEditingUser(null)} onSave={(p:any) => handleUpdateUser(editingUser._id || editingUser.id, p)} />
+								)}
+							</div>
+						)}
 					</div>
-					{requestsLoading ? <div>Loading...</div> : requestsError ? <div style={{ color: 'red' }}>{requestsError}</div> : (
-						<div style={{ display: 'grid', gap: 8 }}>
-							{filteredRequests.map((r: any) => (
-								<RequestItem key={r._id || r.id} request={r} onDelete={deleteRequest} />
-							))}
+				)}
+
+				{activeTab === TAB_ITEMS && (
+					<div className="panel">
+						<h2 className="muted-small">Items</h2>
+						<div style={{ marginBottom: 10, display:'flex', gap:8 }}>
+							<input className="form-input" placeholder="חיפוש פריטים" value={itemsQuery} onChange={(e) => setItemsQuery(e.target.value)} />
 						</div>
-					)}
-				</div>
-			)}
+						{productsLoading ? <div>Loading...</div> : (
+							<ProductList products={filteredItems} onEdit={handleEditProduct} onDelete={deleteProduct} onApproveRequest={approveRequest} />
+						)}
+					</div>
+				)}
+
+				{activeTab === TAB_REQUESTS && (
+					<div className="panel">
+						<h2 className="muted-small">Requests</h2>
+						<div style={{ marginBottom: 10, display:'flex', gap:8 }}>
+							<input className="form-input" placeholder="חפש בקשות" value={requestsQuery} onChange={(e) => setRequestsQuery(e.target.value)} />
+							<button className="btn btn--ghost" onClick={() => fetchAllRequests()}>רענן</button>
+						</div>
+						{requestsLoading ? <div>Loading...</div> : requestsError ? <div style={{ color: 'red' }}>{requestsError}</div> : (
+							<div style={{ display: 'grid', gap: 8 }}>
+								{filteredRequests.map((r: any) => (
+									<RequestItem key={r._id || r.id} request={r} onDelete={deleteRequest} />
+								))}
+
+							</div>
+						)}
+					</div>
+				)}
+
+				{/* Global modals (render once at top level) */}
+				{editingProductModal && (
+					<EditProductModal product={editingProductModal} onCancel={() => setEditingProductModal(null)} onSave={handleSaveProduct} />
+				)}
+
+				{editingUser && (
+					<EditUserModal user={editingUser} onCancel={() => setEditingUser(null)} onSave={(p:any) => handleUpdateUser(p._id || p.id, p)} />
+				)}
+			</div>
 		</div>
 	)
 }

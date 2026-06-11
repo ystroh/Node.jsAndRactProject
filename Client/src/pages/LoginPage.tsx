@@ -59,21 +59,18 @@ const handleLogin = async (e: React.FormEvent) => {
 };
 
   return (
-    <div style={styles.container}>
-      <form onSubmit={handleLogin} style={styles.card}>
-        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>התחברות</h2>
-        <input type="email" placeholder="אימייל" style={styles.input} onChange={(e) => setEmail(e.target.value)} required />
-        <input type="password" placeholder="סיסמה" style={styles.input} onChange={(e) => setPassword(e.target.value)} required />
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit" style={styles.button}>התחבר</button>
+    <div className="auth-page">
+      <form onSubmit={handleLogin} className="auth-card animate-fade-up">
+        <h2 className="auth-title">התחברות</h2>
+        <input className="form-input" type="email" placeholder="אימייל" onChange={(e) => setEmail(e.target.value)} required />
+        <input className="form-input" type="password" placeholder="סיסמה" onChange={(e) => setPassword(e.target.value)} required />
+        {error && <p style={{ color: '#ff6b6b' }}>{error}</p>}
+        <div className="form-actions">
+          <button type="submit" className="btn btn--primary">התחבר</button>
+          <div className="muted-small">אין לך חשבון? <a href="/register">הירשם</a></div>
+        </div>
       </form>
     </div>
   );
 };
-
-const styles: any = {
-  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f4f7f6', direction: 'rtl' },
-  card: { padding: '40px', background: 'white', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', width: '350px' },
-  input: { width: '100%', padding: '12px', margin: '10px 0', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box' },
-  button: { width: '100%', padding: '12px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', marginTop: '10px' }
-};
+ 
