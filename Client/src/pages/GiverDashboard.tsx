@@ -57,9 +57,9 @@ function Inner() {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: 16 }}>
       <h2>המוצרים שלי</h2>
-      <div style={{ marginBottom: 12 }}>
-        <button onClick={() => { setEditing(null); setShowForm((s) => !s) }}>{showForm ? 'Close' : 'Add product'}</button>
-        <button onClick={() => reload()} style={{ marginLeft: 8 }}>Reload</button>
+      <div className="giver-actions">
+        <button className={`btn btn--primary`} onClick={() => { setEditing(null); setShowForm((s) => !s) }}>{showForm ? 'סגור' : 'הוסף מוצר'}</button>
+        <button className={`btn btn--ghost`} onClick={() => reload()}>{'רענן'}</button>
       </div>
 
       {showForm && (

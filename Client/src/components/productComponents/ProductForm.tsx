@@ -42,10 +42,11 @@ export default function ProductForm({ initial, onCancel, onSave }: Props) {
         }
     }
     return (
-        <form onSubmit={submit} style={{ border: '1px solid #eee', padding: 12, borderRadius: 6, marginBottom: 12 }}>
-            <div>
-                <label>Category</label>
+        <form onSubmit={submit} className="card product-form-card">
+            <div className="product-form-row">
+                <label className="product-form-label">קטגוריה</label>
                 <select
+                    className="form-input"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     required
@@ -58,18 +59,20 @@ export default function ProductForm({ initial, onCancel, onSave }: Props) {
                     ))}
                 </select>
             </div>
-            <div>
-                <label>Title</label>
-                <input value={title} onChange={(e) => setTitle(e.target.value)} required />
-            </div>
-            <div>
-                <label>Description</label>
-                <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
 
+            <div className="product-form-row">
+                <label className="product-form-label">כותרת</label>
+                <input className="form-input" value={title} onChange={(e) => setTitle(e.target.value)} required />
             </div>
-            <div style={{ marginTop: 8 }}>
-                <button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
-                <button type="button" onClick={onCancel} style={{ marginLeft: 8 }}>Cancel</button>
+
+            <div className="product-form-row">
+                <label className="product-form-label">תיאור</label>
+                <textarea className="form-input" value={description} onChange={(e) => setDescription(e.target.value)} />
+            </div>
+
+            <div className="product-form-actions">
+                <button type="submit" className="btn btn--primary" disabled={saving}>{saving ? 'שומר...' : 'שמור'}</button>
+                <button type="button" className="btn btn--ghost" onClick={onCancel}>ביטול</button>
             </div>
         </form>
     )
