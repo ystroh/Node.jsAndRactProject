@@ -7,6 +7,7 @@ import { useRequests, RequestsProvider } from '../context/ReceiverContext'
 import { RequestItem } from '../components/requestComponents/RequestItem'
 import * as usersApi from '../api/users'
 import EditUserModal from '../components/common/EditUserModal'
+import useModal from '../hooks/useModal'
 
 const TAB_USERS = 'users'
 const TAB_ITEMS = 'items'
@@ -24,7 +25,7 @@ export function AdminInner() {
 	const [usersError, setUsersError] = useState<string | null>(null)
 	const [usersQuery, setUsersQuery] = useState('')
 
-	const [showAddForm, setShowAddForm] = useState(false)
+	const addUserModal = useModal()
 	const [editingUser, setEditingUser] = useState<any | null>(null)
 
 	// Items search/filter
@@ -90,7 +91,7 @@ export function AdminInner() {
 		try {
 			const created = await usersApi.createUser(payload)
 			setUsers(prev => [created.user || created, ...prev])
-			setShowAddForm(false)
+			addUserModal.close()
 		} catch (err) { console.error(err); alert(String(err)) }
 	}
 
@@ -151,11 +152,11 @@ export function AdminInner() {
 						{usersLoading ? <div>Loading...</div> : usersError ? <div style={{ color: 'red' }}>{usersError}</div> : (
 							<div className="compact-grid">
 								<div style={{ marginBottom: 10 }}>
-									<button className="btn btn--primary" onClick={() => setShowAddForm((s) => !s)}>{showAddForm ? 'סגור' : 'הוסף משתמש'}</button>
+									<button className="btn btn--primary" onClick={() => addUserModal.toggle()}>{addUserModal.isOpen ? 'סגור' : 'הוסף משתמש'}</button>
 								</div>
-								{showAddForm && (
+								{addUserModal.isOpen && (
 									<div className="list-card">
-										<AddUserForm onCancel={() => setShowAddForm(false)} onCreate={handleCreateUser} />
+										<AddUserForm onCancel={addUserModal.close} onCreate={handleCreateUser} />
 									</div>
 								)}
 

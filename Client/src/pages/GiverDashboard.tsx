@@ -5,10 +5,11 @@ import ProductList from '../components/productComponents/ProductList'
 import ProductForm from '../components/productComponents/ProductForm'
 import { Product } from '../types'
 
+import useModal from '../hooks/useModal'
 function Inner() {
   const { products, loading, error, reload, createProduct, updateProduct, deleteProduct, approveRequest } = useProducts()
   const [editing, setEditing] = useState<Product | null>(null)
-  const [showForm, setShowForm] = useState(false)
+  const formModal = useModal()
 
   const myProducts = useMemo(() => {
     const ownerId = localStorage.getItem('ownerId') || localStorage.getItem('userId');
@@ -51,19 +52,18 @@ function Inner() {
       const ownerId = localStorage.getItem('ownerId') || undefined
       await createProduct({ ...payload, ownerId } as Partial<Product>)
     }
-    setShowForm(false)
+    formModal.close()
   }
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: 16 }}>
       <h2>המוצרים שלי</h2>
       <div className="giver-actions">
-        <button className={`btn btn--primary`} onClick={() => { setEditing(null); setShowForm((s) => !s) }}>{showForm ? 'סגור' : 'הוסף מוצר'}</button>
+        <button className={`btn btn--primary`} onClick={() => { setEditing(null); formModal.toggle() }}>{formModal.isOpen ? 'סגור' : 'הוסף מוצר'}</button>
         <button className={`btn btn--ghost`} onClick={() => reload()}>{'רענן'}</button>
       </div>
-
-      {showForm && (
-        <ProductForm initial={editing ?? undefined} onCancel={() => setShowForm(false)} onSave={handleSave} />
+      {formModal.isOpen && (
+        <ProductForm initial={editing ?? undefined} onCancel={formModal.close} onSave={handleSave} />
       )}
 
       {loading && <div>Loading...</div>}
@@ -71,7 +71,7 @@ function Inner() {
 
       <ProductList
         products={myProductsWithRequests}
-        onEdit={(p) => { setEditing(p); setShowForm(true) }}
+        onEdit={(p) => { setEditing(p); formModal.open() }}
         onDelete={async (id) => { if (confirm('Delete product?')) await deleteProduct(id) }}
         onApproveRequest={async (productId, requestId, isApproved) => {
           const action = isApproved ? 'Approve' : 'Reject';
